@@ -1,0 +1,15 @@
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 152 176" xml:space="preserve">
+  <linearGradient id="darkGradient" gradientUnits="userSpaceOnUse" x1="76" y1="1026" x2="76" y2="850.5" gradientTransform="matrix(1 0 0 -1 0 1026)">
+    <stop offset="0" style="stop-color: rgb(0, 0, 0);"></stop>
+    <stop offset="1" style="stop-color: rgb(80, 80, 80);"></stop>
+  </linearGradient>
+  <linearGradient id="lightGradient" gradientUnits="userSpaceOnUse" x1="76" y1="1026" x2="76" y2="850.4" gradientTransform="matrix(1 0 0 -1 0 1026)">
+    <stop offset="0" style="stop-color: rgb(200, 200, 200);"></stop>
+    <stop offset="1" style="stop-color: rgb(100, 100, 100);"></stop>
+  </linearGradient>
+  <g>
+    <path d="M0 43.9v87.7l76 43.9 76-43.9V43.9L76 0 0 43.9z" style="fill: url(#darkGradient);"></path>
+    <path d="m76 27.7 52 30v60l-52 30-52-30v-60l52-30M76 0 0 43.9v87.8l76 43.9 76-43.9V43.9L76 0z" style="fill: url(#lightGradient);"></path>
+    <path d="m90.8 95.9-14.9 8.5L61 95.9v-17l14.9-8.5 14.9 8.5H109V68.4l-33-19-33 19v38.1l33 19 33-19V95.9H90.8z" style="fill: rgb(255, 255, 255);"></path>
+  </g>
+</svg>

@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  civitaiId        Int     @unique
+  url              String
+  hash             String?
+  width            Int
+  height           Int
+  nsfw             Boolean
+  nsfwLevel        String
+  postId           Int?
+  stats            Stats?
+  meta             Meta?
+  username         String?
+  civitaiCreatedAt String?
+}
+
+model Stats {
+  id           Int  @id @default(autoincrement())
+  cryCount     Int?
+  laughCount   Int?
+  likeCount    Int?
+  dislikeCount Int?
+  heartCount   Int?
+  commentCount Int?
+
+  image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int   @unique
+}
+
+model Meta {
+  id                 Int     @id @default(autoincrement())
+  Size               String?
+  seed               BigInt?
+  Model              String?
+  steps              Int?
+  prompt             String?
+  sampler            String?
+  cfgScale           Int?
+  Clip_skip          String?
+  Hires_upscale      String?
+  Hires_upscaler     String?
+  negativePrompt     String?
+  Denoising_strength String?
+
+  image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int   @unique
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  index     Int      @unique // 用于排序
+
+  civitaiId        Int         @unique
+  url              String
+  hash             String?
+  width            Int
+  height           Int
+  nsfw             Boolean
+  nsfwLevel        String
+  postId           Int?
+  stats            FavorStats?
+  meta             FavorMeta?
+  username         String?
+  civitaiCreatedAt String?
+}
+
+model FavorStats {
+  id           Int  @id @default(autoincrement())
+  cryCount     Int?
+  laughCount   Int?
+  likeCount    Int?
+  dislikeCount Int?
+  heartCount   Int?
+  commentCount Int?
+
+  favorite   Favorite @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
+  favoriteId Int      @unique
+}
+
+model FavorMeta {
+  id                 Int     @id @default(autoincrement())
+  Size               String?
+  seed               BigInt?
+  Model              String?
+  steps              Int?
+  prompt             String?
+  sampler            String?
+  cfgScale           Int?
+  Clip_skip          String?
+  Hires_upscale      String?
+  Hires_upscaler     String?
+  negativePrompt     String?
+  Denoising_strength String?
+
+  favorite   Favorite @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
+  favoriteId Int      @unique
+}
+
+model Download {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  civitaiId        Int        @unique
+  url              String
+  hash             String?
+  width            Int
+  height           Int
+  nsfw             Boolean
+  nsfwLevel        String
+  postId           Int?
+  stats            DownStats?
+  meta             DownMeta?
+  username         String?
+  civitaiCreatedAt String?
+}
+
+model DownStats {
+  id           Int  @id @default(autoincrement())
+  cryCount     Int?
+  laughCount   Int?
+  likeCount    Int?
+  dislikeCount Int?
+  heartCount   Int?
+  commentCount Int?
+
+  download   Download @relation(fields: [downloadId], references: [id], onDelete: Cascade)
+  downloadId Int      @unique
+}
+
+model DownMeta {
+  id                 Int     @id @default(autoincrement())
+  Size               String?
+  seed               BigInt?
+  Model              String?
+  steps              Int?
+  prompt             String?
+  sampler            String?
+  cfgScale           Int?
+  Clip_skip          String?
+  Hires_upscale      String?
+  Hires_upscaler     String?
+  negativePrompt     String?
+  Denoising_strength String?
+
+  download   Download @relation(fields: [downloadId], references: [id], onDelete: Cascade)
+  downloadId Int      @unique
+}
