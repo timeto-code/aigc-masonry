@@ -1,0 +1,115 @@
+name: Create Release
+run-name: ${{ github.actor }} releases: 1.0.0-beta.1
+
+on:
+  pull_request:
+    branches:
+      - main 
+    types: [closed]
+
+jobs:
+  build:
+    name: Archive and Build
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 缓存依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            .next/cache
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-npm-
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: 安装依赖
+        run: npm install
+
+      - name: 构建应用
+        run: npm run build
+
+      - name: 归档应用（不包含 node_modules）
+        run: |
+          mkdir aigc-masonry
+          cd aigc-masonry
+          cp -r ../.next .next
+          cp -r ../public public
+          cp -r ../prisma prisma
+          cp ../package.json package.json
+          cp ../package-lock.json package-lock.json
+          cp ../next.config.mjs next.config.mjs
+          cp ../.env .env
+          cp ../README.md README.md
+          cp ../LICENSE LICENSE
+      
+      - name: 归档应用（包含 node_modules）
+        run: |
+          mkdir aigc-masonry-full
+          cd aigc-masonry-full
+          cp -r ../.next .next
+          cp -r ../public public
+          cp -r ../prisma prisma
+          cp ../package.json package.json
+          cp ../package-lock.json package-lock.json
+          cp ../next.config.mjs next.config.mjs
+          cp ../.env .env
+          cp ../README.md README.md
+          cp ../LICENSE LICENSE
+          npm install --omit=dev
+          npx prisma db push
+          rm -rf prisma
+
+      - name: 检出归档文件（不包含 node_modules）
+        run: ls -al aigc-masonry
+
+      - name: 检出归档文件（包含 node_modules）
+        run: ls -al aigc-masonry-full
+
+      - name: 压缩归档文件（不包含 node_modules）
+        run: zip -r aigc-masonry.zip aigc-masonry
+
+      - name: 压缩归档文件（包含 node_modules）
+        run: zip -r aigc-masonry-full.zip aigc-masonry-full
+
+      - name: 创建发布包
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: 1.0.0-beta.1
+          release_name: 1.0.0-beta.1
+          draft: true
+          prerelease: false
+
+      - name: 上传发布包（不包含 node_modules）
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: aigc-masonry.zip
+          asset_name: aigc-masonry.zip
+          asset_content_type: application/zip
+
+      - name: 上传发布包（包含 node_modules）
+        id: upload-release-asset-full
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: aigc-masonry-full.zip
+          asset_name: aigc-masonry-full.zip
+          asset_content_type: application/zip

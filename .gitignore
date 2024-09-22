@@ -34,3 +34,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+sqlite/dev.db
+
+# images
+public/local/*
+!public/local/.gitkeep
+public/favorites/*
+!public/favorites/.gitkeep
+
+# logs
+/logs
