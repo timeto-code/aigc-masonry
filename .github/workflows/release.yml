@@ -1,5 +1,5 @@
 name: Create Release
-run-name: ${{ github.actor }} releases 1.0.0-beta.2
+run-name: ${{ github.actor }} releases 1.0.0-beta.3
 
 on:
   pull_request:
@@ -36,7 +36,9 @@ jobs:
         run: npm install
 
       - name: 构建应用
-        run: npm run build
+        run: |
+          sed -i 's/NEXT_PUBLIC_ENV=.*/NEXT_PUBLIC_ENV=production/' .env
+          npm run build
 
       - name: 归档应用（不包含 node_modules）
         run: |
@@ -67,7 +69,6 @@ jobs:
           cp ../LICENSE LICENSE
           npm install --omit=dev
           npx prisma db push
-          rm -rf prisma
 
       - name: 检出归档文件（不包含 node_modules）
         run: ls -al aigc-masonry
@@ -87,8 +88,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.0-beta.2
-          release_name: v1.0.0-beta.2
+          tag_name: v1.0.0-beta.3
+          release_name: v1.0.0-beta.3
           draft: false
           prerelease: true
 
