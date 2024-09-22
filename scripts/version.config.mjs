@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const version = ["1.0.0-beta.1"];
+const version = ["1.0.0-beta.2", "1.0.0-beta.1"];
 
 const updateSuccess = (filePath) => {
   console.log(`版本号更新成功: ${filePath}`);

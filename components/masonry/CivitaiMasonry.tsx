@@ -17,7 +17,7 @@ const CivitaiMasonry = () => {
     setIsFetching: state.setIsFetching,
   }));
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { favoriteImages, favoriteImageIds } = useGetFavoriteImages();
+  const { favoriteImageIds, refreshFavoriteImageIds } = useGetFavoriteImages();
   const { debounce, restoreScrollPosition, resetScrollPosition } = useScrollEvent(scrollContainerRef);
   const { nsfw, period, sort } = useFilterStore((state) => {
     return {
@@ -111,6 +111,7 @@ const CivitaiMasonry = () => {
 
       await clearCivitaiHistory();
       resetScrollPosition();
+      refreshFavoriteImageIds(Date.now());
       setImages(null);
     }
 
