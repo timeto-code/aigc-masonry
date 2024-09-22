@@ -19,7 +19,7 @@ const FavoritesMasonry = () => {
     setIsFetching: state.setIsFetching,
   }));
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { favoriteImages, favoriteImageIds } = useGetFavoriteImages();
+  const { favoriteImageIds, refreshFavoriteImageIds } = useGetFavoriteImages();
   const { debounce, restoreScrollPosition, resetScrollPosition } = useScrollEvent(scrollContainerRef);
   const nsfw = useFilterStore((state) => state.nsfw);
 
@@ -78,6 +78,7 @@ const FavoritesMasonry = () => {
       setImages(null);
       isFilterChanged = true;
       resetScrollPosition();
+      refreshFavoriteImageIds(Date.now());
     }
 
     const getFavoritesResult = await getFavoritesByFilter(index, nsfw);

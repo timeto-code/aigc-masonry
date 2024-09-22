@@ -1,5 +1,5 @@
 name: Create Release
-run-name: ${{ github.actor }} releases: 1.0.0-beta.1
+run-name: ${{ github.actor }} releases: 1.0.0-beta.2
 
 on:
   pull_request:
@@ -86,9 +86,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: 1.0.0-beta.1
-          release_name: 1.0.0-beta.1
+        with:          tag_name: 1.0.0-beta.2          release_name: 1.0.0-beta.2
           draft: true
           prerelease: false
 
