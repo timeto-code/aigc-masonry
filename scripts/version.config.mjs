@@ -20,9 +20,9 @@ function updateReleaseYml(filePath) {
     let fileContent = fs.readFileSync(filePath, "utf8");
 
     fileContent = fileContent
-      .replace(/^run-name:.*/m, `run-name: \${{ github.actor }} releases: ${version[0]}`)
-      .replace(/^\s*tag_name:\s*.*/m, `          tag_name: ${version[0]}`)
-      .replace(/^\s*release_name:\s*.*/m, `          release_name: ${version[0]}`);
+      .replace(/^run-name:.*/m, `run-name: \${{ github.actor }} releases ${version[0]}`)
+      .replace(/^\s*tag_name:\s*.*/m, `          tag_name: v${version[0]}`)
+      .replace(/^\s*release_name:\s*.*/m, `          release_name: v${version[0]}`);
 
     fs.writeFileSync(filePath, fileContent, "utf8");
 
@@ -62,7 +62,7 @@ function updatePackageJson(filePath) {
  * 1. 以 "version": " 开头的行替换为 "version": "version[0]"
  */
 const versionConfig = () => {
-  const releaseYmlPath = path.join(process.cwd(), ".github", "release.yml");
+  const releaseYmlPath = path.join(process.cwd(), ".github", "workflows", "release.yml");
   const packageJsonPath = path.join(process.cwd(), "package.json");
 
   updateReleaseYml(releaseYmlPath);

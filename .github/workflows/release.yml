@@ -87,10 +87,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 1.0.0-beta.2
-          release_name: 1.0.0-beta.2
-          draft: true
-          prerelease: false
+          tag_name: v1.0.0-beta.2
+          release_name: v1.0.0-beta.2
+          draft: false
+          prerelease: true
 
       - name: 上传发布包（不包含 node_modules）
         id: upload-release-asset
