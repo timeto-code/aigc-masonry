@@ -4,13 +4,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
-    const { nextPageUrl } = (await req.json()) as { nextPageUrl: string };
+    const { url } = (await req.json()) as { url: string };
 
-    if (!nextPageUrl) {
+    if (!url) {
       return NextResponse.json(handleApiError(ERROR_CODES.API_IMAGE_ERROR, "Missing nextPageUrl"));
     }
 
-    const response = await axios.get(nextPageUrl, {
+    const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json",
       },

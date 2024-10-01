@@ -31,3 +31,12 @@ export const generateCardPlaceholder = (
 
   return { placeholderHeight, color1, color2 };
 };
+
+// 判断是否为 nextjs 开发环模式下首次加载
+export const isNextjsDevFirstLoad = () => {
+  const isDev = process.env.NEXT_PUBLIC_ENV === "development" && !sessionStorage.getItem("env");
+  if (isDev) {
+    sessionStorage.setItem("env", "dev");
+  }
+  return isDev;
+};

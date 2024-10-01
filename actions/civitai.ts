@@ -7,11 +7,32 @@
  */
 import { ApiResponse, ERROR_CODES, handleApiData, handleApiError } from "@/lib/api";
 import prisma from "@/lib/db";
+import { NSFW } from "@/store/useFilterStore";
 import { CivitaiImage } from "@/types/prisma";
 
-export const getCivitaiHistory = async (): Promise<ApiResponse<CivitaiImage[] | null>> => {
+export const getCivitaiHistory = async (nsfw: NSFW): Promise<ApiResponse<CivitaiImage[] | null>> => {
   try {
+    const where: {
+      nsfw?: boolean;
+      nsfwLevel?: {
+        in: NSFW[];
+      };
+    } = {};
+
+    if (nsfw === NSFW.Only) {
+      where.nsfw = true;
+    } else if (nsfw === NSFW.None) {
+      where.nsfw = false;
+    } else if (nsfw === NSFW.Soft) {
+      where.nsfwLevel = { in: [NSFW.None, NSFW.Soft] };
+    } else if (nsfw === NSFW.Mature) {
+      where.nsfwLevel = { in: [NSFW.None, NSFW.Soft, NSFW.Mature] };
+    } else if (nsfw === NSFW.X) {
+      where.nsfwLevel = { in: [NSFW.None, NSFW.Soft, NSFW.Mature, NSFW.X] };
+    }
+
     const images: CivitaiImage[] = await prisma.image.findMany({
+      where,
       include: {
         stats: true,
         meta: true,

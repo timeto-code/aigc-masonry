@@ -30,13 +30,35 @@ type FilterStore = {
   setSort: (sort: SORT) => void;
   nsfw: NSFW;
   setNsfw: (nsfw: NSFW) => void;
+  isChanged: boolean;
+  setChanged: (isChanged: boolean) => void;
 };
 
 export const useFilterStore = create<FilterStore>((set) => ({
   period: PERIOD.AllTime,
-  setPeriod: (period) => set({ period }),
+  setPeriod: (period) =>
+    set((state) => {
+      if (state.period !== period) {
+        state.isChanged = true;
+      }
+      return { period };
+    }),
   sort: SORT.MostReactions,
-  setSort: (sort) => set({ sort }),
+  setSort: (sort) =>
+    set((state) => {
+      if (state.sort !== sort) {
+        state.isChanged = true;
+      }
+      return { sort };
+    }),
   nsfw: NSFW.None,
-  setNsfw: (nsfw) => set({ nsfw }),
+  setNsfw: (nsfw) =>
+    set((state) => {
+      if (state.nsfw !== nsfw) {
+        state.isChanged = true;
+      }
+      return { nsfw };
+    }),
+  isChanged: false,
+  setChanged: (isChanged: boolean) => set({ isChanged }),
 }));
