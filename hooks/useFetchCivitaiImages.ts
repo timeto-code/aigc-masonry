@@ -1,13 +1,12 @@
-import { isNextjsDevFirstLoad } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import useCheckPageRefresh from "./useCheckPageRefresh";
-import { useStore } from "@/store/useStore";
-import useScrollEvent from "./useScrollEvent";
-import { NSFW, PERIOD, SORT, useFilterStore } from "@/store/useFilterStore";
 import { clearCivitaiHistory, createCivitaiHistory, getCivitaiHistory } from "@/actions/civitai";
+import { isNextjsDevFirstLoad } from "@/lib/utils";
+import { NSFW, PERIOD, SORT, useFilterStore } from "@/store/useFilterStore";
+import { useStore } from "@/store/useStore";
 import { CivitaiImage } from "@/types/prisma";
+import { useEffect } from "react";
 import useClearHistory from "./useClearHistory";
 import useGetFavoriteImages from "./useGetFavoriteImages";
+import useScrollEvent from "./useScrollEvent";
 
 const fetchImage = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD) => {
   const params = {
@@ -33,15 +32,13 @@ const fetchImage = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, pe
 };
 
 const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
-  // const { isRefresh } = useCheckPageRefresh();
   const { isFetching, setIsFetching } = useStore((state) => ({
     isFetching: state.isFetching,
     setIsFetching: state.setIsFetching,
   }));
   const { debounce, restoreScrollPosition, resetScrollPosition } = useScrollEvent(divRef);
-  const { clearhistory, checkFilterChanged } = useClearHistory();
+  const { clearhistory } = useClearHistory();
   const { refreshFavoriteImageIds } = useGetFavoriteImages();
-
   const { nsfw, period, sort } = useFilterStore((state) => {
     return {
       sort: state.sort,
@@ -65,8 +62,9 @@ const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImage
     const period = (sessionStorage.getItem("period") as PERIOD) ?? useFilterStore.getState().period;
     let nextPageUrl = sessionStorage.getItem("nextPage");
 
-    // 检查条件是否发生变化
-    if (checkFilterChanged()) {
+    // 条件变化时重置 URL
+    const isFilterChanged = useFilterStore.getState().isChanged;
+    if (isFilterChanged) {
       // 清空历史记录
       clearhistory();
       // 重置滚动位置
@@ -77,12 +75,25 @@ const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImage
       setImages(null);
       // 重置 next page url
       nextPageUrl = null;
+      // 重置条件变化状态
+      useFilterStore.getState().setChanged(false);
     }
 
-    console.log("nextPageUrl", nextPageUrl);
+    /**
+     * 设置 isRefresh 判断是否为刷新动作
+     *
+     * 如果不是条件更新触发的请求，那么判断 debounce 值。
+     * 如果时正常的滚动触发的请求，那么 debounce 不可能为 0，为 0 则表示组件新渲染的，这时需要判断 sessionStorage 的 debounce 值。
+     * 首次渲染时 storage 是没有 debounce 属性的，从而分辨是首次渲染还是刷新后重新渲染的。
+     */
+    let isRefresh = false;
+    if (!isFilterChanged && debounce === 0 && sessionStorage.getItem("debounce")) {
+      isRefresh = true;
+    }
+    sessionStorage.setItem("debounce", debounce.toString());
 
     // 正常发送首页或下一页 API 请求
-    if (!false) {
+    if (!isRefresh) {
       const fetchImageResponse = await fetchImage(nextPageUrl, nsfw, sort, period);
 
       if (fetchImageResponse.code === 1 && fetchImageResponse.data) {
@@ -103,7 +114,7 @@ const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImage
       }
     }
     // 页面刷新时不发送 API 请求，直接读取本地历史记录
-    else if (false) {
+    else if (isRefresh) {
       const getImagesResponse = await getCivitaiHistory(nsfw);
       if (getImagesResponse.code === 1 && getImagesResponse.data) {
         setImages(null);

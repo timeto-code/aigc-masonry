@@ -38,7 +38,7 @@ export const getCivitaiHistory = async (nsfw: NSFW): Promise<ApiResponse<Civitai
         meta: true,
       },
       orderBy: {
-        createdAt: "asc",
+        sort: "asc",
       },
     });
 
@@ -60,7 +60,10 @@ export const createCivitaiHistory = async (data: CivitaiImageDto[]): Promise<Api
   try {
     const images: CivitaiImage[] = [];
 
-    const imageOperations = data.map(async (img) => {
+    // 获取 image 总数
+    const total = await prisma.image.count();
+
+    const imageOperations = data.map(async (img, index) => {
       const existingImage = await prisma.image.findUnique({
         where: { civitaiId: img.id },
         include: { stats: true, meta: true },
@@ -115,6 +118,7 @@ export const createCivitaiHistory = async (data: CivitaiImageDto[]): Promise<Api
             postId: img.postId,
             username: img.username,
             civitaiCreatedAt: img.createdAt + "s",
+            sort: total + index,
           },
         })) as CivitaiImage;
 
@@ -145,6 +149,9 @@ export const createCivitaiHistory = async (data: CivitaiImageDto[]): Promise<Api
     });
 
     await Promise.all(imageOperations);
+
+    // 根据 sort 字段排序
+    images.sort((a, b) => a.sort! - b.sort!);
 
     return handleApiData(images);
   } catch (error) {

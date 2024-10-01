@@ -1,19 +1,12 @@
 import { clearCivitaiHistory } from "@/actions/civitai";
-import { useFilterStore } from "@/store/useFilterStore";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const useClearHistory = () => {
   const Pathname = usePathname();
 
   const clearhistory = async () => {
     await clearCivitaiHistory();
-  };
-
-  const checkFilterChanged = () => {
-    const isChanged = useFilterStore.getState().isChanged;
-    useFilterStore.getState().setChanged(false);
-    return isChanged;
   };
 
   useEffect(() => {
@@ -24,9 +17,14 @@ const useClearHistory = () => {
     if (historyPathname !== "/civitai" && Pathname === "/civitai") {
       clearhistory();
     }
+
+    // 保存当前路径
+    return () => {
+      sessionStorage.setItem("historyPathname", Pathname);
+    };
   }, []);
 
-  return { clearhistory, checkFilterChanged };
+  return { clearhistory };
 };
 
 export default useClearHistory;
