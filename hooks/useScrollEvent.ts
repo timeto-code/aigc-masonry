@@ -1,28 +1,29 @@
 import { useEffect, useState } from "react";
 
-const useScrollEvent = (divRef: React.RefObject<HTMLDivElement>) => {
+const useScrollEvent = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
   const [debounce, setDebounce] = useState(0); // 简单防抖机制
+  const [currentPosition, setCurrentPosition] = useState(0); // 用于恢复滚动位置按钮
 
   // 保存滚动条位置
   const saveScrollPosition = () => {
-    const scrollContainer = divRef.current;
+    const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       sessionStorage.setItem("scrollPosition", scrollContainer.scrollTop.toString());
+      setCurrentPosition(scrollContainer.scrollTop);
     }
   };
 
   // 重置滚动位置至顶部
   const resetScrollPosition = () => {
-    const scrollContainer = divRef.current;
+    const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.scrollTo(0, 0);
     }
   };
 
   // 恢复滚动位置
-  const restoreScrollPosition = () => {
-    const scrollContainer = divRef.current;
-    const scrollPosition = sessionStorage.getItem("scrollPosition");
+  const restoreScrollPosition = (scrollPosition: string) => {
+    const scrollContainer = scrollContainerRef.current;
     if (scrollContainer && scrollPosition) {
       scrollContainer.scrollTo(0, parseInt(scrollPosition, 10));
     }
@@ -30,7 +31,7 @@ const useScrollEvent = (divRef: React.RefObject<HTMLDivElement>) => {
 
   // 处理滚动事件
   const handleScroll = () => {
-    const scrollContainer = divRef.current;
+    const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
     const scrollPosition = scrollContainer.scrollTop; // 滚动器位置
@@ -54,7 +55,7 @@ const useScrollEvent = (divRef: React.RefObject<HTMLDivElement>) => {
     // 页面卸载或刷新时，存储滚动位置
     window.addEventListener("beforeunload", saveScrollPosition);
 
-    const scrollContainer = divRef.current;
+    const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.addEventListener("scroll", handleScroll);
     }
@@ -67,7 +68,7 @@ const useScrollEvent = (divRef: React.RefObject<HTMLDivElement>) => {
     };
   }, []);
 
-  return { debounce, restoreScrollPosition, resetScrollPosition };
+  return { debounce, currentPosition, restoreScrollPosition, resetScrollPosition };
 };
 
 export default useScrollEvent;

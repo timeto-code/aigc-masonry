@@ -31,12 +31,17 @@ const fetchImage = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, pe
   }).then((res) => res.json());
 };
 
-const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
+interface Props {
+  scrollContainerRef: React.RefObject<HTMLDivElement>;
+  setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>;
+}
+
+const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
   const { isFetching, setIsFetching } = useStore((state) => ({
     isFetching: state.isFetching,
     setIsFetching: state.setIsFetching,
   }));
-  const { debounce, restoreScrollPosition, resetScrollPosition } = useScrollEvent(divRef);
+  const { debounce, resetScrollPosition } = useScrollEvent(scrollContainerRef);
   const { clearhistory } = useClearHistory();
   const { refreshFavoriteImageIds } = useGetFavoriteImages();
   const { nsfw, period, sort } = useFilterStore((state) => {
@@ -122,8 +127,9 @@ const useFetchCivitaiImages = (divRef: React.RefObject<HTMLDivElement>, setImage
       } else {
         // 自动重试 3 次，每次间隔 1 秒，如果仍然失败，则提示用户
       }
-      // 恢复刷新前的滚动位置
-      restoreScrollPosition();
+
+      // 显示恢复刷新前的滚动位置按钮
+      useStore.getState().setShowRestoreScrollButton(true);
     }
 
     setIsFetching(false);

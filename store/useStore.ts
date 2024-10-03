@@ -19,6 +19,9 @@ type Store = {
   setLightboxVisible: (lightboxVisible: boolean) => void;
   lightboxImage: CivitaiImage | FavoriteImage | ExifTags | null;
   setLightboxImage: (lightboxImage: CivitaiImage | FavoriteImage | ExifTags | null) => void;
+
+  showRestoreScrollButton: boolean;
+  setShowRestoreScrollButton: (showRestoreScrollButton: boolean) => void;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -45,4 +48,7 @@ export const useStore = create<Store>((set) => ({
         return { lightboxImage, lightboxVisible: false };
       }
     }),
+
+  showRestoreScrollButton: false,
+  setShowRestoreScrollButton: (showRestoreScrollButton) => set({ showRestoreScrollButton }),
 }));
