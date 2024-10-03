@@ -13,11 +13,12 @@
  * 10. 复制当前目录 next.config.mjs 文件到 <当前文件夹名-alpha-test> 文件夹下
  * 11. 进入 <当前文件夹名-alpha-test> 目录
  * 12. 执行 npm install --omit=dev
- * 13. 执行 npx prisma db push
- * 14. 在终端打印 "alpha-test 初始化完成，请手动迁移 public 目录内容..."
+ * 13. 检查并删除 sqlite 目录和文件
+ * 14. 执行 npx prisma db push
+ * 15. 在终端打印 "alpha-test 初始化完成，请手动迁移 public 目录内容..."
  */
 
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import fs from "fs-extra";
 import path from "path";
 
@@ -80,7 +81,16 @@ process.chdir(targetDir);
 console.log("执行 npm install --omit=dev...");
 execSync("npm install --omit=dev", { stdio: "inherit" });
 
-// 执行 npx prisma db push
+// 检查并删除 sqlite 目录和文件，确保下一步 prisma db push 为初始化，而不是推送更新
+const sqliteDir = path.join(targetDir, "sqlite");
+if (fs.existsSync(sqliteDir)) {
+  console.log("删除 sqlite 目录...");
+  fs.removeSync(sqliteDir);
+} else {
+  console.log("sqlite 目录不存在，跳过删除...");
+}
+
+// 执行 npx prisma db push 初始化数据库
 console.log("执行 npx prisma db push...");
 execSync("npx prisma db push", { stdio: "inherit" });
 
@@ -89,7 +99,8 @@ console.log("alpha-test 初始化完成，请手动迁移 public 目录内容...
 
 // 打开目标文件夹
 if (process.platform === "win32") {
-  execSync(`explorer ${targetDir.replace(/\//g, "\\")}`);
+  // execSync(`explorer "${targetDir.replace(/\//g, "\\")}"`); 这个方式会虽然能打开文件夹，但是不知道为什么会出现错误提示
+  spawn("explorer", [targetDir.replace(/\//g, "\\")], { detached: true, stdio: "ignore" }).unref();
 } else {
   execSync(`open ${targetDir}`);
 }
