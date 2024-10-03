@@ -8,7 +8,7 @@ import useClearHistory from "./useClearHistory";
 import useGetFavoriteImages from "./useGetFavoriteImages";
 import useScrollEvent from "./useScrollEvent";
 
-const fetchImage = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD) => {
+const civitaiApiCallout = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
   const params = {
     limit: "30",
     nsfw,
@@ -24,11 +24,48 @@ const fetchImage = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, pe
 
   const url = nextPageUrl ?? firstPageUrl;
 
-  return await fetch("/api/image", {
+  const fetchImageResponse = await fetch("/api/image", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
   }).then((res) => res.json());
+
+  if (fetchImageResponse.code === 1 && fetchImageResponse.data) {
+    // 保存下一页 URL
+    sessionStorage.setItem("nextPage", fetchImageResponse.data.metadata.nextPage);
+    // 创建本地历史记录
+    const createImageResponse = await createCivitaiHistory(fetchImageResponse.data.items);
+
+    if (createImageResponse.code === 1 && createImageResponse.data) {
+      setImages((prev) => {
+        return [...(prev ?? []), ...(createImageResponse.data ? createImageResponse.data : [])];
+      });
+    } else {
+      // 创建本地历史记录失败
+    }
+  } else {
+    // 请求 Civitai api 失败
+  }
+};
+
+const loadLocalHistory = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
+  const getImagesResponse = await getCivitaiHistory(nsfw);
+  if (getImagesResponse.code === 1 && getImagesResponse.data) {
+    // 判断本地历史记录是否为空
+    if (!getImagesResponse.data.length) {
+      // 本地历史记录为空，重新请求 Civitai api
+      await civitaiApiCallout(nextPageUrl, nsfw, sort, period, setImages);
+      return;
+    }
+
+    setImages(null);
+    setImages(getImagesResponse.data);
+  } else {
+    // 自动重试 3 次，每次间隔 1 秒，如果仍然失败，则提示用户
+  }
+
+  // 显示恢复刷新前的滚动位置按钮
+  useStore.getState().setShowRestoreScrollButton(true);
 };
 
 interface Props {
@@ -99,37 +136,11 @@ const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
 
     // 正常发送首页或下一页 API 请求
     if (!isRefresh) {
-      const fetchImageResponse = await fetchImage(nextPageUrl, nsfw, sort, period);
-
-      if (fetchImageResponse.code === 1 && fetchImageResponse.data) {
-        // 保存下一页 URL
-        sessionStorage.setItem("nextPage", fetchImageResponse.data.metadata.nextPage);
-        // 创建本地历史记录
-        const createImageResponse = await createCivitaiHistory(fetchImageResponse.data.items);
-
-        if (createImageResponse.code === 1 && createImageResponse.data) {
-          setImages((prev) => {
-            return [...(prev ?? []), ...(createImageResponse.data ? createImageResponse.data : [])];
-          });
-        } else {
-          // 创建本地历史记录失败
-        }
-      } else {
-        // 请求 Civitai api 失败
-      }
+      await civitaiApiCallout(nextPageUrl, nsfw, sort, period, setImages);
     }
     // 页面刷新时不发送 API 请求，直接读取本地历史记录
     else if (isRefresh) {
-      const getImagesResponse = await getCivitaiHistory(nsfw);
-      if (getImagesResponse.code === 1 && getImagesResponse.data) {
-        setImages(null);
-        setImages(getImagesResponse.data);
-      } else {
-        // 自动重试 3 次，每次间隔 1 秒，如果仍然失败，则提示用户
-      }
-
-      // 显示恢复刷新前的滚动位置按钮
-      useStore.getState().setShowRestoreScrollButton(true);
+      await loadLocalHistory(nextPageUrl, nsfw, sort, period, setImages);
     }
 
     setIsFetching(false);
