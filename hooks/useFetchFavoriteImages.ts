@@ -18,7 +18,7 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
     setIsFetching: state.setIsFetching,
   }));
   const { debounce, resetScrollPosition } = useScrollEvent(scrollContainerRef);
-  const nsfw = useFilterStore((state) => state.nsfw);
+  const nsfw = useFilterStore((state) => state.favorNsfw);
   const [isEmpty, setIsEmpty] = React.useState(false);
   const [nomore, setNomore] = React.useState(false);
   const { favoriteImageIds, refreshFavoriteImageIds } = useGetFavoriteImages();
@@ -27,7 +27,7 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
     if (useStore.getState().isFetching) return;
     setIsFetching(true);
 
-    const filterNsfw = (sessionStorage.getItem("nsfw") as NSFW) ?? nsfw;
+    const filterNsfw = (sessionStorage.getItem("favorNsfw") as NSFW) ?? nsfw;
 
     // 每次获取的数量
     let take = 20;
