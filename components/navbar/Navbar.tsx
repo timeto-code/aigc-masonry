@@ -1,4 +1,4 @@
-import Filter from "../filter/Filter";
+import Filter from "./filter/Filter";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import Civitai from "./Civitai";
 import LocalFiles from "./LocalFiles";

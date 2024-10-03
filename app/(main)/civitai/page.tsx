@@ -1,6 +1,6 @@
 import CivitaiMasonry from "@/components/masonry/CivitaiMasonry";
 
-const page = () => {
+const page = async () => {
   return <CivitaiMasonry />;
 };
 

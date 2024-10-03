@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const version = ["1.0.0-beta.3", "1.0.0-beta.2", "1.0.0-beta.1"];
+const version = ["1.0.0-beta.5", "1.0.0-beta.4", "1.0.0-beta.3", "1.0.0-beta.2", "1.0.0-beta.1"];
 
 const updateSuccess = (filePath) => {
   console.log(`版本号更新成功: ${filePath}`);
@@ -38,12 +38,37 @@ function updateReleaseYml(filePath) {
  */
 function updatePackageJson(filePath) {
   try {
-    let fileContent = fs.readFileSync(filePath, "utf8");
+    const data = fs.readFileSync(filePath, "utf8"); // 读取文件内容
+    const jsonData = JSON.parse(data); // 将 JSON 内容解析为对象
 
-    fileContent = fileContent.replace(/"version":\s*".*"/, `"version": "${version[0]}"`);
+    // 更新 app version 信息
+    jsonData.version = version[0]; // 更新为你想要的新版本号
 
-    fs.writeFileSync(filePath, fileContent, "utf8");
+    fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
+    updateSuccess(filePath);
+  } catch (error) {
+    updateFail(filePath, error);
+  }
+}
 
+/**
+ * 更新 package-lock.json 文件内容
+ * @param {string} filePath 文件路径
+ */
+function updatePackageLockJson(filePath) {
+  try {
+    const data = fs.readFileSync(filePath, "utf8"); // 读取文件内容
+    const jsonData = JSON.parse(data); // 将 JSON 内容解析为对象
+
+    // 更新 app version 信息
+    jsonData.version = version[0]; // 更新为你想要的新版本号
+
+    // 更新 package version 属性
+    if (jsonData.packages && jsonData.packages[""]) {
+      jsonData.packages[""].version = version[0];
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
     updateSuccess(filePath);
   } catch (error) {
     updateFail(filePath, error);
@@ -64,9 +89,11 @@ function updatePackageJson(filePath) {
 const versionConfig = () => {
   const releaseYmlPath = path.join(process.cwd(), ".github", "workflows", "release.yml");
   const packageJsonPath = path.join(process.cwd(), "package.json");
+  const packageLockJsonPath = path.join(process.cwd(), "package-lock.json");
 
   updateReleaseYml(releaseYmlPath);
   updatePackageJson(packageJsonPath);
+  updatePackageLockJson(packageLockJsonPath);
 };
 
 versionConfig();

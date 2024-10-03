@@ -3,7 +3,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SlidersHorizontal } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import Nsfw from "./Nsfw";
 import Period from "./Period";
 import Sort from "./Sort";

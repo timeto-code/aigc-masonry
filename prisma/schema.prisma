@@ -16,6 +16,7 @@ datasource db {
 model Image {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  sort      Int? // 用于排序
 
   civitaiId        Int     @unique
   url              String
@@ -67,6 +68,7 @@ model Favorite {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   index     Int      @unique // 用于排序
+  isFavor   Boolean  @default(true)
 
   civitaiId        Int         @unique
   url              String

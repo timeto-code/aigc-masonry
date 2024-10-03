@@ -3,7 +3,7 @@
 import { ApiResponse, ERROR_CODES, handleApiData, handleApiError } from "@/lib/api";
 import prisma from "@/lib/db";
 import { NSFW } from "@/store/useFilterStore";
-import { FavoriteImage } from "@/types/prisma";
+import { CivitaiImage, FavoriteImage } from "@/types/prisma";
 
 /**
  * 根据 `nextIndex` 和 `nsfw` 过滤条件获取收藏的图片列表。
@@ -12,9 +12,10 @@ import { FavoriteImage } from "@/types/prisma";
  * @param {NSFW} nsfw - NSFW 过滤条件：NSFW.Only（仅限 NSFW），NSFW.None（无 NSFW），或 NSFW 等级。
  * @returns 返回包含收藏图片列表的 `ApiResponse` 对象。
  */
-export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW): Promise<ApiResponse<FavoriteImage[] | null>> => {
+export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW, take: number): Promise<ApiResponse<FavoriteImage[] | null>> => {
   try {
-    const where: { index: { gt: number }; nsfw?: boolean; nsfwLevel?: NSFW } = {
+    const where: { isFavor: boolean; index: { gt: number }; nsfw?: boolean; nsfwLevel?: NSFW } = {
+      isFavor: true,
       index: { gt: nextIndex },
     };
 
@@ -37,7 +38,7 @@ export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW): Promi
       orderBy: {
         index: "asc",
       },
-      take: 20,
+      take,
     });
 
     return handleApiData(favorites);
@@ -54,6 +55,9 @@ export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW): Promi
 export const getAllFavorites = async (): Promise<ApiResponse<FavoriteImage[] | null>> => {
   try {
     const favorites: FavoriteImage[] = await prisma.favorite.findMany({
+      where: {
+        isFavor: true,
+      },
       include: {
         stats: true,
         meta: true,
@@ -76,17 +80,30 @@ export const getAllFavorites = async (): Promise<ApiResponse<FavoriteImage[] | n
  */
 export const favoriteImage = async (civitaiId: number, isFavorite: boolean): Promise<ApiResponse<number | null>> => {
   try {
-    const image = await prisma.image.findUnique({
+    let image: FavoriteImage | CivitaiImage | null = await prisma.favorite.findFirst({
       where: { civitaiId },
-      include: { stats: true, meta: true },
     });
+
+    if (!image) {
+      image = await prisma.image.findFirst({
+        where: { civitaiId },
+        include: { stats: true, meta: true },
+      });
+    }
 
     if (!image) {
       return handleApiError(ERROR_CODES.FAVORITE_IMAGE_ERROR, "Image not found");
     }
 
-    if (isFavorite) {
+    if (isFavorite && Object.hasOwn(image, "isFavor")) {
+      await prisma.favorite.update({
+        where: { civitaiId },
+        data: { isFavor: true },
+      });
+      return handleApiData(null);
+    } else if (isFavorite) {
       const lastFavorite = await prisma.favorite.findFirst({
+        where: { isFavor: true },
         orderBy: { index: "desc" },
       });
       const lastIndex = lastFavorite?.index || 0;
@@ -144,8 +161,9 @@ export const favoriteImage = async (civitaiId: number, isFavorite: boolean): Pro
 
       return handleApiData(favorite.id);
     } else {
-      await prisma.favorite.deleteMany({
-        where: { civitaiId: image.civitaiId },
+      await prisma.favorite.update({
+        where: { civitaiId },
+        data: { isFavor: false },
       });
       return handleApiData(null);
     }

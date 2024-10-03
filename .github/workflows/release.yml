@@ -1,5 +1,5 @@
 name: Create Release
-run-name: ${{ github.actor }} releases 1.0.0-beta.3
+run-name: ${{ github.actor }} releases 1.0.0-beta.5
 
 on:
   pull_request:
@@ -12,7 +12,8 @@ jobs:
     name: Archive and Build
     runs-on: ubuntu-latest
 
-    if: github.event.pull_request.merged == true
+    # 只有仓库管理员发起的 PR 才执行
+    if: github.actor == 'timeto-code' && github.event.pull_request.merged == true
 
     steps:
       - name: 检出代码
@@ -54,33 +55,33 @@ jobs:
           cp ../README.md README.md
           cp ../LICENSE LICENSE
 
-      - name: 归档应用（包含 node_modules）
-        run: |
-          mkdir aigc-masonry-full
-          cd aigc-masonry-full
-          cp -r ../.next .next
-          cp -r ../public public
-          cp -r ../prisma prisma
-          cp ../package.json package.json
-          cp ../package-lock.json package-lock.json
-          cp ../next.config.mjs next.config.mjs
-          cp ../.env .env
-          cp ../README.md README.md
-          cp ../LICENSE LICENSE
-          npm install --omit=dev
-          npx prisma db push
+      # - name: 归档应用（包含 node_modules）
+      #   run: |
+      #     mkdir aigc-masonry-full
+      #     cd aigc-masonry-full
+      #     cp -r ../.next .next
+      #     cp -r ../public public
+      #     cp -r ../prisma prisma
+      #     cp ../package.json package.json
+      #     cp ../package-lock.json package-lock.json
+      #     cp ../next.config.mjs next.config.mjs
+      #     cp ../.env .env
+      #     cp ../README.md README.md
+      #     cp ../LICENSE LICENSE
+      #     npm install --omit=dev
+      #     npx prisma db push
 
       - name: 检出归档文件（不包含 node_modules）
         run: ls -al aigc-masonry
 
-      - name: 检出归档文件（包含 node_modules）
-        run: ls -al aigc-masonry-full
+      # - name: 检出归档文件（包含 node_modules）
+      #   run: ls -al aigc-masonry-full
 
       - name: 压缩归档文件（不包含 node_modules）
         run: zip -r aigc-masonry.zip aigc-masonry
 
-      - name: 压缩归档文件（包含 node_modules）
-        run: zip -r aigc-masonry-full.zip aigc-masonry-full
+      # - name: 压缩归档文件（包含 node_modules）
+      #   run: zip -r aigc-masonry-full.zip aigc-masonry-full
 
       - name: 创建发布包
         id: create_release
@@ -88,8 +89,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.0-beta.3
-          release_name: v1.0.0-beta.3
+          tag_name: v1.0.0-beta.5
+          release_name: v1.0.0-beta.5
           draft: false
           prerelease: true
 
@@ -104,13 +105,13 @@ jobs:
           asset_name: aigc-masonry.zip
           asset_content_type: application/zip
 
-      - name: 上传发布包（包含 node_modules）
-        id: upload-release-asset-full
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: aigc-masonry-full.zip
-          asset_name: aigc-masonry-full.zip
-          asset_content_type: application/zip
+      # - name: 上传发布包（包含 node_modules）
+      #   id: upload-release-asset-full
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: aigc-masonry-full.zip
+      #     asset_name: aigc-masonry-full.zip
+      #     asset_content_type: application/zip
