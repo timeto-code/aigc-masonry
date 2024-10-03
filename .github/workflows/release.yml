@@ -88,7 +88,9 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:          tag_name: v1.0.0-beta.5          release_name: v1.0.0-beta.5
+        with:
+          tag_name: v1.0.0-beta.5
+          release_name: v1.0.0-beta.5
           draft: false
           prerelease: true
 
