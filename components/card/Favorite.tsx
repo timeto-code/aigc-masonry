@@ -13,7 +13,7 @@ interface Props {
 }
 
 const Favorite = ({ img, favoriteIds, setProgress, setStatus }: Props) => {
-  const isFavImg = Object.hasOwn(img, "index") || favoriteIds.includes(img.civitaiId.toString());
+  const isFavImg = favoriteIds.includes(img.civitaiId.toString());
   const [isFavorite, setIsFavorite] = useState(isFavImg);
 
   const { onlyFavoriteVisible, favoriteVisible } = useStore((state) => {
