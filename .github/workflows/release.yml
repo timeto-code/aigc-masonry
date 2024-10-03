@@ -12,7 +12,8 @@ jobs:
     name: Archive and Build
     runs-on: ubuntu-latest
 
-    if: github.event.pull_request.merged == true
+    # 只有仓库管理员发起的 PR 才执行
+    if: github.actor == 'timeto-code' && github.event.pull_request.merged == true
 
     steps:
       - name: 检出代码
