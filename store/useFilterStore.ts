@@ -32,6 +32,7 @@ type FilterStore = {
   setNsfw: (nsfw: NSFW) => void;
   isChanged: boolean;
   setChanged: (isChanged: boolean) => void;
+  restoreFilter: () => void;
 };
 
 export const useFilterStore = create<FilterStore>((set) => ({
@@ -61,4 +62,11 @@ export const useFilterStore = create<FilterStore>((set) => ({
     }),
   isChanged: false,
   setChanged: (isChanged: boolean) => set({ isChanged }),
+  restoreFilter: () => {
+    const period = (sessionStorage.getItem("period") as PERIOD) ?? PERIOD.AllTime;
+    const sort = (sessionStorage.getItem("sort") as SORT) ?? SORT.MostReactions;
+    const nsfw = (sessionStorage.getItem("nsfw") as NSFW) ?? NSFW.None;
+
+    set({ period, sort: sort, nsfw });
+  },
 }));

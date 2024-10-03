@@ -131,6 +131,8 @@ const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
     let isRefresh = false;
     if (!isFilterChanged && debounce === 0 && sessionStorage.getItem("debounce")) {
       isRefresh = true;
+      // 恢复条件值
+      useFilterStore.getState().restoreFilter();
     }
     sessionStorage.setItem("debounce", debounce.toString());
 

@@ -12,7 +12,7 @@ import { FavoriteImage } from "@/types/prisma";
  * @param {NSFW} nsfw - NSFW 过滤条件：NSFW.Only（仅限 NSFW），NSFW.None（无 NSFW），或 NSFW 等级。
  * @returns 返回包含收藏图片列表的 `ApiResponse` 对象。
  */
-export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW): Promise<ApiResponse<FavoriteImage[] | null>> => {
+export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW, take: number): Promise<ApiResponse<FavoriteImage[] | null>> => {
   try {
     const where: { index: { gt: number }; nsfw?: boolean; nsfwLevel?: NSFW } = {
       index: { gt: nextIndex },
@@ -37,7 +37,7 @@ export const getFavoritesByFilter = async (nextIndex: number, nsfw: NSFW): Promi
       orderBy: {
         index: "asc",
       },
-      take: 20,
+      take,
     });
 
     return handleApiData(favorites);
