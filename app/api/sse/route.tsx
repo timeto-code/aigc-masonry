@@ -45,7 +45,7 @@ export const GET = async (req: NextRequest) => {
 
         // 监听流结束事件
         videoStream.on("end", () => {
-          console.log(`Download complete, total bytes read: ${bytesRead}`);
+          // console.log(`Download complete, total bytes read: ${bytesRead}`);
 
           // 下载完成，发送结束消息
           controller.enqueue(encoder.encode("data: download complete\n\n"));

@@ -1,3 +1,4 @@
+import { useStore } from "@/store/useStore";
 import { useEffect, useState } from "react";
 
 const useScrollEvent = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
@@ -46,6 +47,9 @@ const useScrollEvent = (scrollContainerRef: React.RefObject<HTMLDivElement>) => 
     if (percentageFromBottom <= 20) {
       setDebounce(Math.floor(Date.now() / 1000));
     }
+
+    // 检查是否到达底部，用于显示 NoMore 组件
+    useStore.setState({ isScrollBottom: percentageFromBottom.toFixed() === "0" });
 
     // 这里时防止意外刷新页面情况
     saveScrollPosition();

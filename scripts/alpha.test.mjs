@@ -86,3 +86,10 @@ execSync("npx prisma db push", { stdio: "inherit" });
 
 // 在终端打印 "alpha-test 初始化完成，请手动迁移 public 目录内容..."
 console.log("alpha-test 初始化完成，请手动迁移 public 目录内容... \n");
+
+// 打开目标文件夹
+if (process.platform === "win32") {
+  execSync(`explorer ${targetDir.replace(/\//g, "\\")}`);
+} else {
+  execSync(`open ${targetDir}`);
+}

@@ -9,19 +9,17 @@ import useScrollEvent from "./useScrollEvent";
 
 interface Props {
   scrollContainerRef: React.RefObject<HTMLDivElement>;
-  setImages: React.Dispatch<React.SetStateAction<FavoriteImage[] | null>>;
+  setImages: React.Dispatch<React.SetStateAction<FavoriteImage[]>>;
 }
 
-const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
+const useFetchFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
   const { isFetching, setIsFetching } = useStore((state) => ({
     isFetching: state.isFetching,
     setIsFetching: state.setIsFetching,
   }));
   const { debounce, resetScrollPosition } = useScrollEvent(scrollContainerRef);
+  const { refreshFavoriteImageIds } = useGetFavoriteImages();
   const nsfw = useFilterStore((state) => state.favorNsfw);
-  const [isEmpty, setIsEmpty] = React.useState(false);
-  const [nomore, setNomore] = React.useState(false);
-  const { favoriteImageIds, refreshFavoriteImageIds } = useGetFavoriteImages();
 
   const fetchFavoriteImages = async () => {
     if (useStore.getState().isFetching) return;
@@ -45,10 +43,8 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
     if (isFilterChanged) {
       // 重置索引
       index = 0;
-      // 重置空提醒
-      setIsEmpty(false);
       // 重置图片列表
-      setImages(null);
+      setImages([]);
       // 重置滚动位置
       resetScrollPosition();
       // 同步收藏信息
@@ -62,7 +58,7 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
      *
      * 如果不是条件更新触发的请求，那么判断 debounce 值。
      * 如果时正常的滚动触发的请求，那么 debounce 不可能为 0，为 0 则表示组件新渲染的，这时需要判断 sessionStorage 的 debounce 值。
-     * 首次渲染时 storage 是没有 debounce 属性的，从而分辨是首次渲染还是刷新后重新渲染的。
+     * 首次渲染时 storage 是没有 debounce 属性的，从而分辨并非首次渲染还是刷新后重新渲染的。
      */
     if (!isFilterChanged && debounce === 0 && sessionStorage.getItem("debounce")) {
       index = 0;
@@ -93,13 +89,9 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
           }
         });
       } else {
-        // 查询结果为空，并且时滚动触发的，那么显示没有更多
-        setNomore(true);
-
-        // 查询结果为空，并且时条件变更后的，那么显示空提醒
-        if (isFilterChanged) {
-          setIsEmpty(true);
-          setNomore(false);
+        // 通过滚动触发的请求，没有数据时才显示没有更多提示，条件变化触发的请求没有数据时显示无收藏记录
+        if (!isFilterChanged) {
+          useStore.getState().setNoMore(true);
         }
       }
     } else {
@@ -116,7 +108,7 @@ const useFavoriteImages = ({ scrollContainerRef, setImages }: Props) => {
     fetchFavoriteImages();
   }, [debounce, nsfw]);
 
-  return { isFetching, isEmpty, nomore, favoriteImageIds };
+  return { isFetching };
 };
 
-export default useFavoriteImages;
+export default useFetchFavoriteImages;

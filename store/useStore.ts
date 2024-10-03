@@ -22,6 +22,11 @@ type Store = {
 
   showRestoreScrollButton: boolean;
   setShowRestoreScrollButton: (showRestoreScrollButton: boolean) => void;
+
+  noMore: boolean;
+  setNoMore: (noMore: boolean) => void;
+  isScrollBottom: boolean;
+  setIsScrollBottom: (isScrollBottom: boolean) => void;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -51,4 +56,9 @@ export const useStore = create<Store>((set) => ({
 
   showRestoreScrollButton: false,
   setShowRestoreScrollButton: (showRestoreScrollButton) => set({ showRestoreScrollButton }),
+
+  noMore: false,
+  setNoMore: (noMore) => set({ noMore }),
+  isScrollBottom: false,
+  setIsScrollBottom: (isScrollBottom) => set({ isScrollBottom }),
 }));

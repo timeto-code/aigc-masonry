@@ -8,7 +8,7 @@ import useClearHistory from "./useClearHistory";
 import useGetFavoriteImages from "./useGetFavoriteImages";
 import useScrollEvent from "./useScrollEvent";
 
-const civitaiApiCallout = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
+const civitaiApiCallout = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[]>>) => {
   const params = {
     limit: "30",
     nsfw,
@@ -48,7 +48,7 @@ const civitaiApiCallout = async (nextPageUrl: string | null, nsfw: NSFW, sort: S
   }
 };
 
-const loadLocalHistory = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>) => {
+const loadLocalHistory = async (nextPageUrl: string | null, nsfw: NSFW, sort: SORT, period: PERIOD, setImages: React.Dispatch<React.SetStateAction<CivitaiImage[]>>) => {
   const getImagesResponse = await getCivitaiHistory(nsfw);
   if (getImagesResponse.code === 1 && getImagesResponse.data) {
     // 判断本地历史记录是否为空
@@ -58,7 +58,7 @@ const loadLocalHistory = async (nextPageUrl: string | null, nsfw: NSFW, sort: SO
       return;
     }
 
-    setImages(null);
+    setImages([]);
     setImages(getImagesResponse.data);
   } else {
     // 自动重试 3 次，每次间隔 1 秒，如果仍然失败，则提示用户
@@ -70,7 +70,7 @@ const loadLocalHistory = async (nextPageUrl: string | null, nsfw: NSFW, sort: SO
 
 interface Props {
   scrollContainerRef: React.RefObject<HTMLDivElement>;
-  setImages: React.Dispatch<React.SetStateAction<CivitaiImage[] | null>>;
+  setImages: React.Dispatch<React.SetStateAction<CivitaiImage[]>>;
 }
 
 const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
@@ -79,8 +79,8 @@ const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
     setIsFetching: state.setIsFetching,
   }));
   const { debounce, resetScrollPosition } = useScrollEvent(scrollContainerRef);
-  const { clearhistory } = useClearHistory();
   const { refreshFavoriteImageIds } = useGetFavoriteImages();
+  const { clearhistory } = useClearHistory();
   const { nsfw, period, sort } = useFilterStore((state) => {
     return {
       sort: state.sort,
@@ -114,7 +114,7 @@ const useFetchCivitaiImages = ({ scrollContainerRef, setImages }: Props) => {
       // 同步收藏信息
       refreshFavoriteImageIds(Date.now());
       // 重置图片列表
-      setImages(null);
+      setImages([]);
       // 重置 next page url
       nextPageUrl = null;
       // 重置条件变化状态

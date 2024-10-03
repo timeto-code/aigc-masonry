@@ -9,7 +9,7 @@ import RestoreScrollButton from "../RestoreScrollButton";
 import CardMasonry from "./CardMasonry";
 
 const CivitaiMasonry = () => {
-  const [images, setImages] = React.useState<CivitaiImage[] | null>(null);
+  const [images, setImages] = React.useState<CivitaiImage[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { favoriteImageIds } = useGetFavoriteImages();
   const { isFetching } = useFetchCivitaiImages({ scrollContainerRef, setImages });
@@ -19,7 +19,7 @@ const CivitaiMasonry = () => {
       <CardMasonry images={images} favoriteIds={favoriteImageIds} />
       <RestoreScrollButton scrollContainerRef={scrollContainerRef} />
       {isFetching && (
-        <div className={`flex justify-center items-center mt-4 ${!images ? "h-full" : "h-28"}`}>
+        <div className={`flex justify-center items-center mt-4 ${images.length === 0 ? "h-full" : "h-28"}`}>
           <Loading />
         </div>
       )}

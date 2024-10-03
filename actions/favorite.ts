@@ -85,7 +85,7 @@ export const favoriteImage = async (civitaiId: number, isFavorite: boolean): Pro
     });
 
     if (!image) {
-      image = await prisma.image.findUnique({
+      image = await prisma.image.findFirst({
         where: { civitaiId },
         include: { stats: true, meta: true },
       });
